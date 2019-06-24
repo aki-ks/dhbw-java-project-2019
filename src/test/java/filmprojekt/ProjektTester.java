@@ -1,34 +1,49 @@
+package filmprojekt;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class ProjektTester {
-    // Konfiguration eurer Hauptklasse. Bitte vollqualifizierten Klassennamen plus Paket angeben.
-    // Z.b. die Klasse MeinProjekt im Paket dhbw.java, muss lauten: 'dhbw.java.MeinProjekt'
-    private static final String MAIN_CLASS = "Main";
+    private static final String MAIN_CLASS = Main.class.getName();
 
-    public static void main(String[] args) {
-        // Tests are passing
-        boolean passed = true;
+    @Test
+    public void movieNetworkTestMatrix() {
+        passedTestNetzwerk("--filmnetzwerk=2081", "Keanu Reeves", "Day the Earth Stood Still", 3, 42);
+    }
 
-        // Matrix
-        passed = passedTestNetzwerk("--filmnetzwerk=2081", "Keanu Reeves", "Day the Earth Stood Still", 3, 42);
-        // Lord of the Rings: The Return of the King
-        passed &= passedTestNetzwerk("--filmnetzwerk=5045", "Ali Astin", "The Fellowship of the Ring", 3, 6);
-        // Asterix and the Gauls
-        passed &= passedTestNetzwerk("--filmnetzwerk=5764", "Jacques Morel", "Asterix and the Vikings ", 3, 0);
-        // Jason Statham
-        passed &= passedTestNetzwerk("--schauspielernetzwerk=19786", "Ice Cube", "Italian Job", 26, 15);
-        // Eric Clapton
-        passed &= passedTestNetzwerk("--schauspielernetzwerk=15729", "Joe Brown", "Concert for George", 5, 2);
-        // Will Smith
-        passed &= passedTestNetzwerk("--schauspielernetzwerk=18925", "Robert De Niro", "Men in Black", 42, 17);
+    @Test
+    public void movieNetworkTestLordOfTheRings() {
+        passedTestNetzwerk("--filmnetzwerk=5045", "Ali Astin", "The Fellowship of the Ring", 3, 6);
+    }
 
-        if (passed) {
-            System.out.println("Alle Tests bestanden ᕕ( ᐛ )ᕗ");
-        } else {
-            System.out.println("Leider nicht alle Tests bestanden.");
-        }
+    @Test
+    public void movieNetworkTestAsterix() {
+        passedTestNetzwerk("--filmnetzwerk=5764", "Jacques Morel", "Asterix and the Vikings ", 3, 0);
+    }
+
+    @Test
+    public void actorNetworkTestJasonStatham() {
+        passedTestNetzwerk("--schauspielernetzwerk=19786", "Ice Cube", "Italian Job", 26, 15);
+    }
+
+    @Test
+    public void actorNetworkTestEricClaptop() {
+        passedTestNetzwerk("--schauspielernetzwerk=15729", "Joe Brown", "Concert for George", 5, 2);
+    }
+
+    @Test
+    public void actorNetworkTestWillSmith() {
+        passedTestNetzwerk("--schauspielernetzwerk=18925", "Robert De Niro", "Men in Black", 42, 17);
+    }
+
+    @Test
+    public void actorNetworkTestBudSpencer() {
+        passedTestNetzwerk("--schauspielernetzwerk=14230", "Marina Langner", "Banana Joe", 2, 0);
     }
 
     /**
@@ -42,7 +57,7 @@ public class ProjektTester {
      * @param filmeComma Anzahl der Kommas in der Filmzeile
      * @return
      */
-    private static boolean passedTestNetzwerk(String arg, String schauspielerContaines, String filmeContains, int schauspielerComma, int filmeComma) {
+    private static void passedTestNetzwerk(String arg, String schauspielerContaines, String filmeContains, int schauspielerComma, int filmeComma) {
         boolean passed = true;
         // Der System.out Stream muss umgebogen werden, damit dieser später überprüft werden kann.
         PrintStream normalerOutput = System.out;
@@ -69,25 +84,20 @@ public class ProjektTester {
         for (String line : lines) {
             if (line.startsWith("Schauspieler")) {
                 if (!line.contains(schauspielerContaines)) {
-                    passed = false;
-                    System.err.println("Test: " + arg + " fehlgeschlagen, weil Schauspieler nicht stimmen.");
+                    fail("Test fehlgeschlagen, weil Schauspieler nicht stimmen.");
                 }
                 if (countComma(line) != schauspielerComma) {
-                    passed = false;
-                    System.err.println("Test: " + arg + " fehlgeschlagen, weil Anzahl der Schauspieler nicht stimmen. Erwartet: " + schauspielerComma + ", erhalten: " + countComma(line));
+                    fail("Test fehlgeschlagen, weil Anzahl der Schauspieler nicht stimmen. Erwartet: " + schauspielerComma + ", erhalten: " + countComma(line));
                 }
-            } else {
+            } else if (line.startsWith("Filme")) {
                 if (!line.contains(filmeContains)) {
-                    passed = false;
-                    System.err.println("Test: " + arg + " fehlgeschlagen, weil Filme nicht stimmen.");
+                    fail("Test fehlgeschlagen, weil Filme nicht stimmen.");
                 }
                 if (countComma(line) != filmeComma) {
-                    passed = false;
-                    System.err.println("Test: " + arg + " fehlgeschlagen, weil Anzahl der Filme nicht stimmen. Erwartet: " + filmeComma + ", erhalten: " + countComma(line));
+                    fail("Test fehlgeschlagen, weil Anzahl der Filme nicht stimmen. Erwartet: " + filmeComma + ", erhalten: " + countComma(line));
                 }
             }
         }
-        return passed;
     }
 
     /**
